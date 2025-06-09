@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Review API Tester</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        h1,
+        h2,
+        h3 {
+            color: #333;
+        }
+        
+        .container {
+            margin-bottom: 30px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+            background-color: #f9f9f9;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input,
+        textarea,
+        select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        .response {
+            margin-top: 15px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fff;
+            min-height: 100px;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: #eee;
+            border: 1px solid #ddd;
+            border-radius: 4px 4px 0 0;
+            margin-right: 5px;
+        }
+        
+        .tab.active {
+            background-color: #f9f9f9;
+            border-bottom: 1px solid #f9f9f9;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .token-display {
+            word-break: break-all;
+            background-color: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Book Review API Tester</h1>
+    <p>Use this page to test the Book Review API endpoints.</p>
+
+    <div class="tabs">
+        <div class="tab active" onclick="openTab(event, 'auth')">Authentication</div>
+        <div class="tab" onclick="openTab(event, 'books')">Books</div>
+        <div class="tab" onclick="openTab(event, 'reviews')">Reviews</div>
+    </div>
+
+    <div id="auth" class="tab-content active">
+        <div class="container">
+            <h2>User Registration</h2>
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="signupUsername">Username:</label>
+                    <input type="text" id="signupUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="signupPassword">Password:</label>
+                    <input type="password" id="signupPassword" required>
+                </div>
+                <button type="submit">Sign Up</button>
+            </form>
+            <div class="response" id="signupResponse"></div>
+        </div>
+
+        <div class="container">
+            <h2>User Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginUsername">Username:</label>
+                    <input type="text" id="loginUsername" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password:</label>
+                    <input type="password" id="loginPassword" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
+            <div class="response" id="loginResponse"></div>
+            <div id="tokenContainer" style="display: none;">
+                <h3>Your JWT Token:</h3>
+                <div class="token-display" id="tokenDisplay"></div>
+                <button onclick="copyToken()">Copy Token</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="books" class="tab-content">
+        <div class="container">
+            <h2>Add a New Book</h2>
+            <form id="addBookForm">
+                <div class="form-group">
+                    <label for="bookTitle">Title:</label>
+                    <input type="text" id="bookTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="bookAuthor">Author:</label>
+                    <input type="text" id="bookAuthor" required>
+                </div>
+                <div class="form-group">
+                    <label for="bookGenre">Genre:</label>
+                    <input type="text" id="bookGenre" required>
+                </div>
+                <div class="form-group">
+                    <label for="bookDescription">Description:</label>
+                    <textarea id="bookDescription" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="bookYear">Published Year:</label>
+                    <input type="number" id="bookYear" required>
+                </div>
+                <div class="form-group">
+                    <label for="bookToken">JWT Token:</label>
+                    <input type="text" id="bookToken" required>
+                </div>
+                <button type="submit">Add Book</button>
+            </form>
+            <div class="response" id="addBookResponse"></div>
+        </div>
+
+        <div class="container">
+            <h2>Get All Books</h2>
+            <form id="getBooksForm">
+                <div class="form-group">
+                    <label for="booksPage">Page:</label>
+                    <input type="number" id="booksPage" value="1">
+                </div>
+                <div class="form-group">
+                    <label for="booksLimit">Limit:</label>
+                    <input type="number" id="booksLimit" value="10">
+                </div>
+                <div class="form-group">
+                    <label for="booksAuthor">Author (optional):</label>
+                    <input type="text" id="booksAuthor">
+                </div>
+                <div class="form-group">
+                    <label for="booksGenre">Genre (optional):</label>
+                    <input type="text" id="booksGenre">
+                </div>
+                <button type="submit">Get Books</button>
+            </form>
+            <div class="response" id="getBooksResponse"></div>
+        </div>
+
+        <div class="container">
+            <h2>Search Books</h2>
+            <form id="searchBooksForm">
+                <div class="form-group">
+                    <label for="searchQuery">Search Term:</label>
+                    <input type="text" id="searchQuery" required>
+                </div>
+                <button type="submit">Search</button>
+            </form>
+            <div class="response" id="searchBooksResponse"></div>
+        </div>
+
+        <div class="container">
+            <h2>Get Book Details</h2>
+            <form id="getBookForm">
+                <div class="form-group">
+                    <label for="bookId">Book ID:</label>
+                    <input type="text" id="bookId" required>
+                </div>
+                <button type="submit">Get Book Details</button>
+            </form>
+            <div class="response" id="getBookResponse"></div>
+        </div>
+    </div>
+
+    <div id="reviews" class="tab-content">
+        <div class="container">
+            <h2>Add a Review</h2>
+            <form id="addReviewForm">
+                <div class="form-group">
+                    <label for="reviewBookId">Book ID:</label>
+                    <input type="text" id="reviewBookId" required>
+                </div>
+                <div class="form-group">
+                    <label for="reviewRating">Rating (1-5):</label>
+                    <input type="number" id="reviewRating" min="1" max="5" required>
+                </div>
+                <div class="form-group">
+                    <label for="reviewComment">Comment:</label>
+                    <textarea id="reviewComment" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="reviewToken">JWT Token:</label>
+                    <input type="text" id="reviewToken" required>
+                </div>
+                <button type="submit">Add Review</button>
+            </form>
+            <div class="response" id="addReviewResponse"></div>
+        </div>
+
+        <div class="container">
+            <h2>Update a Review</h2>
+            <form id="updateReviewForm">
+                <div class="form-group">
+                    <label for="updateReviewId">Review ID:</label>
+                    <input type="text" id="updateReviewId" required>
+                </div>
+                <div class="form-group">
+                    <label for="updateReviewRating">Rating (1-5):</label>
+                    <input type="number" id="updateReviewRating" min="1" max="5" required>
+                </div>
+                <div class="form-group">
+                    <label for="updateReviewComment">Comment:</label>
+                    <textarea id="updateReviewComment" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="updateReviewToken">JWT Token:</label>
+                    <input type="text" id="updateReviewToken" required>
+                </div>
+                <button type="submit">Update Review</button>
+            </form>
+            <div class="response" id="updateReviewResponse"></div>
+        </div>
+
+        <div class="container">
+            <h2>Delete a Review</h2>
+            <form id="deleteReviewForm">
+                <div class="form-group">
+                    <label for="deleteReviewId">Review ID:</label>
+                    <input type="text" id="deleteReviewId" required>
+                </div>
+                <div class="form-group">
+                    <label for="deleteReviewToken">JWT Token:</label>
+                    <input type="text" id="deleteReviewToken" required>
+                </div>
+                <button type="submit">Delete Review</button>
+            </form>
+            <div class="response" id="deleteReviewResponse"></div>
+        </div>
+    </div>
+
+    <script>
+        // Tab functionality
+        function openTab(evt, tabName) {
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
+
+            const tabs = document.getElementsByClassName("tab");
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove("active");
+            }
+
+            document.getElementById(tabName).classList.add("active");
+            evt.currentTarget.classList.add("active");
+        }
+
+        // API base URL
+        const API_URL = 'http://localhost:5000/api';
+
+        // Helper function to display response
+        function displayResponse(elementId, data) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+
+        // Copy token to clipboard
+        function copyToken() {
+            const tokenDisplay = document.getElementById('tokenDisplay');
+            const textArea = document.createElement('textarea');
+            textArea.value = tokenDisplay.textContent;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('Token copied to clipboard!');
+        }
+
+        // Signup form submission
+        document.getElementById('signupForm').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const username = document.getElementById('signupUsername').value;
+            const password = document.getElementById('signupPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+                displayResponse('signupResponse', data);
+            } catch (error) {
+                displayResponse('signupResponse', {
+                    error: error.message
+                });
+            }
+        });
+
+        // Login form submission
+        document.getElementById('loginForm').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+                displayResponse('loginResponse', data);
+
+                if (data.token) {
+                    document.getElementById('tokenContainer').style.display = 'block';
+                    document.getElementById('tokenDisplay').textContent = data.token;
+
+                    // Auto-fill token fields
+                    document.getElementById('bookToken').value = data.token;
+                    document.getElementById('reviewToken').value = data.token;
+                    document.getElementById('updateReviewToken').value = data.token;
+                    document.getElementById('deleteReviewToken').value = data.token;
+                }
+            } catch (error) {
+                displayResponse('loginResponse', {
+                    error: error.message
+                });
+            }
+        });
+
+        // Add Book form submission
+        document.getElementById('addBookForm').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const title = document.getElementById('bookTitle').value;
+            const author = document.getElementById('bookAuthor').value;
+            const genre = document.getElementById('bookGenre').value;
+            const description = document.getElementById('bookDescription').value;
+            const publishedYear = document.getElementById('bookYear').value;
+            const token = document.getElementById('bookToken').value;
+
+            try {
+                const response = await fetch(`${API_URL}/books`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        title,
+                        author,
+                        genre,
+                        description,
+                        publishedYear: parseInt(publishedYear)
+                    })
+                });
+
+                const data = await response.json();
+                displayResponse('addBookResponse', data);
+            } catch (error) {
+                displayResponse('addBookResponse', {
+                    error: error.message
+                });
+            }
+        });
+
+        // Get Books form submission
+        document.getElementById('getBooksForm').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const page = document.getElementById('booksPage').value;
+            const limit = document.getElementById('booksLimit').value;
+            const author = document.getElementById('booksAuthor').value;
+            const genre = document.getElementById('booksGenre').value;
+
+            let url = `${API_URL}/books?page=${page}&limit=${limit}`;
+            if (author) url += `&author=${encodeURIComponent(author)}`;
+            if (genre) url += `&genre=${encodeURIComponent(genre)}`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                displayResponse('getBooksResponse', data);
+            } catch (error) {
+                displayResponse('getBooksResponse', {
+                    error: error.message
+                });
+            }
+        });
+
+        // Search Books form submission
+        document.getElementById('searchBooksForm').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const query = document.getElementById('searchQuery').value;
+
+            try {
+                const response = await fetch(`${API_URL}/books/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                displayResponse('searchBooksResponse', data);
+            } catch (error) {
+                displayResponse('searchBooksResponse', {
+                    error: error.message
+                });
+            }
+        });
+
+        // Get Book Details form submission
+        document.getElementById('getBookForm').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const bookId = document.getElementById('bookId').value;
+
+            try {
+                const response = await fetch(`${API_URL}/books/${bookId}`);
+                const data = await response.json();
+                displayResponse('getBookResponse', data);
+            } catch (error) {
+                displayResponse('getBookResponse', {
+                    error: error.message
+                });
+            }
+        });
+
+        // Add Review form submission
+        document.getElementById('addReviewForm').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const bookId = document.getElementById('reviewBookId').value;
+            const rating = document.getElementById('reviewRating').value;
+            const comment = document.getElementById('reviewComment').value;
+            const token = document.getElementById('reviewToken').value;
+
+            try {
+                const response = await fetch(`${API_URL}/books/${bookId}/reviews`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        rating: parseInt(rating),
+                        comment
+                    })
+                });
+
+                const data = await response.json();
+                displayResponse('addReviewResponse', data);
+            } catch (error) {
+                displayResponse('addReviewResponse', {
+                    error: error.message
+                });
+            }
+        });
+
+        // Update Review form submission
+        document.getElementById('updateReviewForm').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const reviewId = document.getElementById('updateReviewId').value;
+            const rating = document.getElementById('updateReviewRating').value;
+            const comment = document.getElementById('updateReviewComment').value;
+            const token = document.getElementById('updateReviewToken').value;
+
+            try {
+                const response = await fetch(`${API_URL}/reviews/${reviewId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        rating: parseInt(rating),
+                        comment
+                    })
+                });
+
+                const data = await response.json();
+                displayResponse('updateReviewResponse', data);
+            } catch (error) {
+                displayResponse('updateReviewResponse', {
+                    error: error.message
+                });
+            }
+        });
+
+        // Delete Review form submission
+        document.getElementById('deleteReviewForm').addEventListener('submit', async(e) => {
+            e.preventDefault();
+            const reviewId = document.getElementById('deleteReviewId').value;
+            const token = document.getElementById('deleteReviewToken').value;
+
+            try {
+                const response = await fetch(`${API_URL}/reviews/${reviewId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                displayResponse('deleteReviewResponse', data);
+            } catch (error) {
+                displayResponse('deleteReviewResponse', {
+                    error: error.message
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>
